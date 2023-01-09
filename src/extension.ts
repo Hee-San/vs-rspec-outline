@@ -2,6 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
+const RSPEC_DOCUMENT_SELECTOR = { language: 'ruby', scheme: 'file', pattern: '**/*_rspec.rb' };
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -19,8 +21,33 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from vs-rspec-outline!');
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(
+		vscode.languages.registerDocumentSymbolProvider(
+			RSPEC_DOCUMENT_SELECTOR,
+			new RspecDocumentSymbolProvider()
+		)
+	);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
+
+class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
+		const symbols: vscode.SymbolInformation[] = [];
+
+		for (let i = 0; i < document.lineCount; i++) {
+			let line = document.lineAt(i).text;
+			const match = line.match(/^(\s*)(describe|context|it)\s+['"](.*)['"]/);
+			if (match) {
+				const indent = match[1];
+				const containerName = match[2];
+				const name = match[3];
+				const location = new vscode.Location(document.uri, document.lineAt(i).range);
+				const symbol = new vscode.SymbolInformation(name, vscode.SymbolKind.Method, containerName, location);
+				symbols.push(symbol);
+			}
+		}
+		return symbols;
+	}
+}
