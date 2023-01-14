@@ -23,7 +23,7 @@ class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 			if (match) {
 				const indent = match[1];
 				const containerName = match[2];
-				const name = match[3];
+				const name = match[2] + ' ' + match[3];
 				const location = new vscode.Location(document.uri, document.lineAt(i).range);
 				const symbol = new vscode.SymbolInformation(name, vscode.SymbolKind.Method, containerName, location);
 				symbols.push(symbol);
