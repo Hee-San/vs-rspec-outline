@@ -1,6 +1,6 @@
 {
-  "name": "vs-rspec-outline",
-	"displayName": "vs-rspec-outline",
+  "name": "rspec-outline",
+	"displayName": "rspec-outline",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {

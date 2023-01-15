@@ -13,22 +13,63 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() { }
 
-class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
-	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
-		const symbols: vscode.SymbolInformation[] = [];
+export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Thenable<vscode.DocumentSymbol[]> {
+		return new Promise((resolve, reject) => {
+			const symbolAndIndents: [vscode.DocumentSymbol, number][] = this.listSymbols(document);
+			const outline = this.getSymbolOutline(symbolAndIndents);
+			resolve(outline);
+		});
+	}
+
+	private listSymbols(document: vscode.TextDocument) {
+		const symbolAndIndents: [vscode.DocumentSymbol, number][] = [];
 
 		for (let i = 0; i < document.lineCount; i++) {
-			let line = document.lineAt(i).text;
-			const match = line.match(/^(\s*)(describe|context|it)\s+['"](.*)['"]/);
-			if (match) {
-				const indent = match[1];
-				const containerName = match[2];
-				const name = match[2] + ' ' + match[3];
-				const location = new vscode.Location(document.uri, document.lineAt(i).range);
-				const symbol = new vscode.SymbolInformation(name, vscode.SymbolKind.Method, containerName, location);
-				symbols.push(symbol);
-			}
+			const line = document.lineAt(i);
+			const match = line.text.match(/^(\s*)(describe|context|it) ['"](.*)['"] do$/);
+
+			if (!match) { continue; }
+
+			const indent = match[1].length;
+			const type = match[2];
+			const name = type + ' ' + match[3];
+			const kind = this.getKind(type);
+			const symbol = new vscode.DocumentSymbol(name, '', kind, line.range, line.range);
+
+			symbolAndIndents.push([symbol, indent]);
 		}
-		return symbols;
+		return symbolAndIndents;
+	}
+
+	private getSymbolOutline(symbolAndIndents: [vscode.DocumentSymbol, number][]) {
+		const dummyRootSymbol = new vscode.DocumentSymbol('root', '', vscode.SymbolKind.File, new vscode.Range(0, 0, 0, 0), new vscode.Range(0, 0, 0, 0));
+		const symbolPath: [vscode.DocumentSymbol, number][] = [[dummyRootSymbol, -1]];
+
+		for (let i = 0; i < symbolAndIndents.length; i++) {
+			const [symbol, indent] = symbolAndIndents[i];
+
+			while (symbolPath[symbolPath.length - 1][1] >= indent) {
+				symbolPath.pop();
+			}
+
+			symbolPath[symbolPath.length - 1][0].children.push(symbol);
+			symbolPath.push([symbol, indent]);
+		}
+
+		return dummyRootSymbol.children;
+	}
+
+	private getKind(type: string) {
+		switch (type) {
+			case 'describe':
+				return vscode.SymbolKind.Namespace;
+			case 'context':
+				return vscode.SymbolKind.Class;
+			case 'it':
+				return vscode.SymbolKind.Method;
+			default:
+				return vscode.SymbolKind.Function;
+		}
 	}
 }
