@@ -1,7 +1,7 @@
 # vs-rspec-outline
 
 ## Features
-![screenshot](./screenshot.png)
+![screenshot](https://github.com/Hee-San/vs-rspec-outline/raw/main/screenshot.png)
 
 ## Requirements
 
