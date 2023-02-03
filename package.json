@@ -1,6 +1,7 @@
 {
-  "name": "vs-rspec-outline",
-	"displayName": "vs-rspec-outline",
+	"name": "rspec-outline",
+	"publisher": "t.hirashima",
+	"displayName": "rspec-outline",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
@@ -10,17 +11,10 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:vs-rspec-outline.helloWorld"
+		"onLanguage:ruby"
 	],
 	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "vs-rspec-outline.helloWorld",
-				"title": "Hello World"
-			}
-		]
-	},
+	"contributes": {},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",

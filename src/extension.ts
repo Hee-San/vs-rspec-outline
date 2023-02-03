@@ -1,26 +1,75 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+const RSPEC_DOCUMENT_SELECTOR = { language: 'ruby', scheme: 'file', pattern: "**/*_spec.rb" };
+
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vs-rspec-outline" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('vs-rspec-outline.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vs-rspec-outline!');
-	});
-
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(
+		vscode.languages.registerDocumentSymbolProvider(
+			RSPEC_DOCUMENT_SELECTOR,
+			new RspecDocumentSymbolProvider()
+		)
+	);
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
+
+export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Thenable<vscode.DocumentSymbol[]> {
+		return new Promise((resolve, reject) => {
+			const symbolAndIndents: [vscode.DocumentSymbol, number][] = this.listSymbols(document);
+			const outline = this.getSymbolOutline(symbolAndIndents);
+			resolve(outline);
+		});
+	}
+
+	private listSymbols(document: vscode.TextDocument) {
+		const symbolAndIndents: [vscode.DocumentSymbol, number][] = [];
+
+		for (let i = 0; i < document.lineCount; i++) {
+			const line = document.lineAt(i);
+			const match = line.text.match(/^(\s*)(describe|context|it) ['"](.*)['"] do$/);
+
+			if (!match) { continue; }
+
+			const indent = match[1].length;
+			const type = match[2];
+			const name = type + ' ' + match[3];
+			const kind = this.getKind(type);
+			const symbol = new vscode.DocumentSymbol(name, '', kind, line.range, line.range);
+
+			symbolAndIndents.push([symbol, indent]);
+		}
+		return symbolAndIndents;
+	}
+
+	private getSymbolOutline(symbolAndIndents: [vscode.DocumentSymbol, number][]) {
+		const dummyRootSymbol = new vscode.DocumentSymbol('root', '', vscode.SymbolKind.File, new vscode.Range(0, 0, 0, 0), new vscode.Range(0, 0, 0, 0));
+		const symbolPath: [vscode.DocumentSymbol, number][] = [[dummyRootSymbol, -1]];
+
+		for (let i = 0; i < symbolAndIndents.length; i++) {
+			const [symbol, indent] = symbolAndIndents[i];
+
+			while (symbolPath[symbolPath.length - 1][1] >= indent) {
+				symbolPath.pop();
+			}
+
+			symbolPath[symbolPath.length - 1][0].children.push(symbol);
+			symbolPath.push([symbol, indent]);
+		}
+
+		return dummyRootSymbol.children;
+	}
+
+	private getKind(type: string) {
+		switch (type) {
+			case 'describe':
+				return vscode.SymbolKind.Namespace;
+			case 'context':
+				return vscode.SymbolKind.Class;
+			case 'it':
+				return vscode.SymbolKind.Method;
+			default:
+				return vscode.SymbolKind.Function;
+		}
+	}
+}
