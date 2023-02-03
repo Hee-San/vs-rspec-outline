@@ -1,5 +1,6 @@
 {
-  "name": "rspec-outline",
+	"name": "rspec-outline",
+	"publisher": "t.hirashima",
 	"displayName": "rspec-outline",
 	"description": "",
 	"version": "0.0.1",
@@ -10,11 +11,10 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onLanguage:ruby"
+		"onLanguage:ruby"
 	],
 	"main": "./out/extension.js",
-	"contributes": {
-	},
+	"contributes": {},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
