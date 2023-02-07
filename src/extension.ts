@@ -33,7 +33,7 @@ export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvide
 
 			const indent = match[1].length;
 			const type = match[2];
-			const name = type + ' ' + match[3];
+			const name = type + ' ' + (match[3] || match[4]);
 			const kind = this.getKind(type);
 			const range = new vscode.Range(i, indent, i, line.length);
 			const symbol = new vscode.DocumentSymbol(name, '', kind, range, range);
