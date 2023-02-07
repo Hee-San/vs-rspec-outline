@@ -27,7 +27,7 @@ export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvide
 
 		for (let i = 0; i < document.length; i++) {
 			const line = document[i];
-			const match = line.match(/^(\s*)(describe|context|it|specify|example) (?:['"](.*)['"] do|\{ (.*) \})$/);
+			const match = line.match(/^(\s*)(describe|context|it|specify|example) (?:['"](.*)['"] do|\{ (.*) \})/);
 
 			if (!match) { continue; }
 
