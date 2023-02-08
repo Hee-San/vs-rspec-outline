@@ -12,7 +12,7 @@ Visual Studio Code で、rspec のアウトラインを表示する拡張機能�
 
 Download the latest vsix file from [Releases](https://github.com/Hee-San/vs-rspec-outline/releases)
 
-[Releases](https://github.com/Hee-San/vs-rspec-outline/releases)　から、最新版の vsix ファイルをダウンロードしてください
+[Releases](https://github.com/Hee-San/vs-rspec-outline/releases) から、最新版の vsix ファイルをダウンロードしてください
 
 ### 2. Install
 
@@ -33,7 +33,11 @@ https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-
 
 ## Release Notes
 
+### 1.1.0
+
+- Support one line syntax
+- Support `specify` and `example`
 
 ### 1.0.0
 
-Initial release of vs-rspec-outline
+- Initial release of vs-rspec-outline

@@ -2,8 +2,12 @@
 	"name": "rspec-outline",
 	"publisher": "t.hirashima",
 	"displayName": "rspec-outline",
-	"description": "",
-	"version": "1.0.0",
+	"description": "Extension to display rspec outline in Visual Studio Code",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Hee-San/vs-rspec-outline"
+	},
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.74.0"
 	},
@@ -25,7 +29,6 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
-		"@types/jest": "^29.4.0",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "14.x",
 		"@types/vscode": "^1.74.0",
