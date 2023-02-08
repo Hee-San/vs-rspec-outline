@@ -28,6 +28,6 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(symbolAndIndents[1][0].name, 'context bar');
 		assert.strictEqual(symbolAndIndents[2][0].name, 'it baz');
 		assert.strictEqual(symbolAndIndents[3][0].name, 'it is_expected.to be_valid');
-	}
-},
+	});
+}
 );
