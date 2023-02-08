@@ -16,26 +16,27 @@ export function deactivate() { }
 export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Thenable<vscode.DocumentSymbol[]> {
 		return new Promise((resolve, reject) => {
-			const symbolAndIndents: [vscode.DocumentSymbol, number][] = this.listSymbols(document);
+			const symbolAndIndents: [vscode.DocumentSymbol, number][] = this.listSymbols(document.getText().split(/\r\n|\n/));
 			const outline = this.getSymbolOutline(symbolAndIndents);
 			resolve(outline);
 		});
 	}
 
-	private listSymbols(document: vscode.TextDocument) {
+	private listSymbols(document: string[]) {
 		const symbolAndIndents: [vscode.DocumentSymbol, number][] = [];
 
-		for (let i = 0; i < document.lineCount; i++) {
-			const line = document.lineAt(i);
-			const match = line.text.match(/^(\s*)(describe|context|it) ['"](.*)['"] do$/);
+		for (let i = 0; i < document.length; i++) {
+			const line = document[i];
+			const match = line.match(/^(\s*)(describe|context|it|specify|example) (?:['"](.*)['"] do|\{ (.*) \})/);
 
 			if (!match) { continue; }
 
 			const indent = match[1].length;
 			const type = match[2];
-			const name = type + ' ' + match[3];
+			const name = type + ' ' + (match[3] || match[4]);
 			const kind = this.getKind(type);
-			const symbol = new vscode.DocumentSymbol(name, '', kind, line.range, line.range);
+			const range = new vscode.Range(i, indent, i, line.length);
+			const symbol = new vscode.DocumentSymbol(name, '', kind, range, range);
 
 			symbolAndIndents.push([symbol, indent]);
 		}
@@ -67,6 +68,8 @@ export class RspecDocumentSymbolProvider implements vscode.DocumentSymbolProvide
 			case 'context':
 				return vscode.SymbolKind.Class;
 			case 'it':
+			case 'specify':
+			case 'example':
 				return vscode.SymbolKind.Method;
 			default:
 				return vscode.SymbolKind.Function;
